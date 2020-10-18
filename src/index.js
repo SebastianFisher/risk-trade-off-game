@@ -1,50 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import VersionOne from './VersionOne.js';
 import * as serviceWorker from './serviceWorker';
-
-function FormattedDate(props) {
-  return <h2>It is {props.date.toLocaleTimeString()}</h2>
-}
-
-class Clock extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {date: new Date()}
-  }
-  componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 1000);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timerID);
-  }
-  
-  tick() {
-    this.setState({date: new Date()});
-  }
-
-  render() {
-    return (
-    <div>
-      <FormattedDate date={this.state.date} />
-    </div>
-    )
-  }  
-}
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 ReactDOM.render(
-  <div>
-    <Clock />
-    <Clock />
-    <Clock />
-  </div>,
+  <VersionOne />,
   document.getElementById("root")
 );
-
-
 
 
 // If you want your app to work offline and load faster, you can change
