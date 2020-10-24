@@ -1,0 +1,28 @@
+Button {
+    margin: 0px 20px;
+}
+span.btn {
+    font-size: 25px;
+    color: #f7f7f7;
+}
+
+.home-screen {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.ver-1-btn {
+    position: relative;
+    top: 550px;
+    right: 50px;
+}
+
+.ver-2-btn {
+    position: relative;
+    top: 550px;
+    left: 50px;
+}
+
+
+

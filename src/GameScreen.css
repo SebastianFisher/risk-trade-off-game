@@ -1,0 +1,49 @@
+.game {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.game-rules {
+  overflow-x: wrap;
+}
+
+.info {
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+
+main {
+  padding: 10px;
+  overflow-y: scroll;
+  font-size: 20px;
+}
+
+.market-info {
+  position: relative;
+}
+
+#market-info-results {
+  position: absolute;
+  top: 20%;
+}
+
+::-webkit-scrollbar {
+  border-top-right-radius: 15px;
+  width: 10px;
+  cursor: grab;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(231, 112, 112);
+  border-radius: 15px;
+}
+
+#rebalance-q {
+  max-width: 15em;
+  overflow: wrap;
+}
+
+ul {
+  display: inline-block;
+  text-align: left;
+}
