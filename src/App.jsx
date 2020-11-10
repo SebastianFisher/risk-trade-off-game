@@ -18,7 +18,7 @@ export default function App() {
                     <Route path="/game-2">
                         <GameScreen version={2} />
                     </Route>
-                    <Route exact path="/" >
+                    <Route path="./" >
                         <HomeScreen />
                     </Route>
                 </Switch>
