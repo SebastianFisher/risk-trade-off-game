@@ -16,9 +16,8 @@ export default class RebalanceSlider extends React.Component {
     render() {
         return (
             <div className="slide-container">
-                <input className="slider" type="range" min="0.25" max="0.75" step="0.0025" value={this.props.allocation} onChange={this.handleSlide} />
+                <input className="slider" type="range" min={Number.parseFloat(0.25 * this.props.balance).toFixed(2)} max={Number.parseFloat(0.75 * this.props.balance).toFixed(2)} step={0.25} value={this.props.potA} onChange={this.handleSlide} />
                 <br />
-                <p>{this.props.allocation}</p>
             </div>
         )
     }

@@ -2,9 +2,20 @@ import React from 'react';
 import "./EndScreen.css";
 
 function Row(props) {
-    let tds = props.data.map(
-        (dataPt) => <td key={dataPt}>{dataPt}</td>
-    );
+    let data = props.data;
+    const tds = []
+    for (let i = 0; i < data.length; i++) {
+        let tempDataPt;
+        // If not on the round column, make all numbers into dollars
+        if (i === 0 || typeof (data[i]) !== "number") {
+            tempDataPt = data[i];
+        } else {
+            tempDataPt = `$${data[i].toFixed(2)}`;
+        }
+        tds.push(
+            <td key={`row-${props.row}-column-${i + 1}`}>{tempDataPt}</td>
+        );
+    }
     return (
         <tr>
             {tds}
@@ -15,7 +26,7 @@ function Row(props) {
 function DataTable(props) {
     // Take in data from props
     let data = props.data;
-
+    console.log(data)
     // Separate data into a two dimensional array containing arrays of round data
     let tableData = [];
     for (let i = 0; i < data.length; i++) {
@@ -29,9 +40,9 @@ function DataTable(props) {
     // Create the names for the columns based on the game's version
     let columnNames;
     if (props.version === 1) {
-        columnNames = ["Round", "Initial Equity Bal", "Initial Cash Bal", "Market Result", "Market Change", "Equities After Market", "Cash After Spending", "Did the Player Rebalance?", "Final Equity Bal", "Final Cash Bal"];
+        columnNames = ["Round", "Initial Equity Bal ($)", "Initial Cash Bal ($)", "Market Result", "Market Change ($)", "Equities After Market ($)", "Cash After Spending ($)", "Did the Player Rebalance?", "Final Equity Bal ($)", "Final Cash Bal ($)"];
     } else if (props.version === 2) {
-        columnNames = ["Round", "Investment Portfolio Bal", "Spending Portfolio Bal", "Market Result", "Market Change", "Investment Portfolio After Market", "Spending Portfolio After Spending", "Did the Player Rebalance?", "Final Investment Portfolio Bal", "Final Spending Portfolio Bal"]
+        columnNames = ["Round", "Initial Growth Portfolio Bal ($)", "Spending Portfolio Bal ($)", "Market Result", "Market Change ($)", "Growth Portfolio Bal After Market ($)", "Spending Portfolio After Spending ($)", "Did the Player Rebalance?", "Final Growth Portfolio Bal ($)", "Final Spending Portfolio Bal ($)"];
     }
 
     // Make the table headers using the list of column names
@@ -43,7 +54,7 @@ function DataTable(props) {
     let rows = [];
     for (let i = 0; i < tableData.length; i++) {
         // Add a new row with using the data for that row
-        rows.push(<Row data={tableData[i]} key={`row-${i+1}`} />);
+        rows.push(<Row data={tableData[i]} key={i + 1} />);
     }
 
     // Return the completed table
@@ -77,9 +88,11 @@ export default class EndScreen extends React.Component {
         const result = this.props.location.state.result;
         const rounds = this.data.length;
         if (result === "success") {
-            message = `Congratulations! You successfully completed ${rounds} rounds of the game and finished with a total balance of $${this.data[rounds - 1].potAFinal + this.data[rounds - 1].potBFinal}.`
+            message = `Congratulations! You successfully completed ${rounds} rounds of the game and finished with a total balance of $${(this.data[rounds - 1].potAFinal + this.data[rounds - 1].potBFinal).toFixed(2)}.` +
+                " Your stats for each round are shown in the table above.";
         } else if (result === "failed") {
-            message = `Unfortunately, you failed to complete the game and ran out of money. You made it through ${rounds} rounds successfully.`
+            message = `Unfortunately, you failed to complete the game and ran out of money. You made it through ${rounds} rounds successfully.` +
+                " Your stats for each round are shown in the table above."
         }
 
         // Render the info from the game if the user accessed the link from the game

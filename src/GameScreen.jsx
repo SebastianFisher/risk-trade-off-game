@@ -6,29 +6,21 @@ import RebalanceSlider from "./RebalanceSlider.jsx";
 import pic1 from "./images/market-increase.png";
 import pic2 from "./images/market-decrease.png";
 
-// Make it so the slider moves by like 10 cents (have to pass in min and max as props)
-// Have the slider start at the inital percent balance
-// Save results to a table somehow as the application moves along
-// When you start the round, you should get a message (i.e the markets went up)
-// Then the spending happens, and then you pop up the message parts up
-// V1, say something about MPT making the allocation now auto 50/50
-// V2, doesn't have auto rebalance, say that now markets went up or down, do you want 
-// to add more years of spending
-
 function RebalanceOptns(props) {
   let slider;
   let choices;
+  let message = props.version === 1 ? "Would you like to change the allocation in your portfolio before the next round?" : "Would you like to move money between portfolios before the next round?";
   if (props.showSlider) {
     choices = null;
     slider = (
       <div id="rebalance-slide">
-        <RebalanceSlider onSlide={props.onSlide} />
+        <RebalanceSlider onSlide={props.onSlide} potA={props.potA} balance={props.balance} /> <br />
         <Button id="done-rebalancing" variant="danger" onClick={props.done}>Done Rebalancing</Button>
       </div>);
   } else {
     choices = (
       <div id="choices-container">
-        <label id="rebalance-q" for="choices">Would you like to rebalance before the next round?</label>
+        <label id="rebalance-q" for="choices">{message}</label>
         <div id="choices">
           <Button id="yes-rebalance" variant="danger" onClick={(e) => props.onClick("yes", e)}>Yes</Button>
           <Button id="no-rebalance" variant="danger" onClick={(e) => props.onClick("no", e)}>No</Button>
@@ -70,18 +62,20 @@ function GameInfo(props) {
   if (props.version === 1) {
     return (
       <p className="info">
-        Portfolio Balance: ${props.balance}<br />
         Round: {props.round}<br />
-        Amount invested in equities: ${props.potA}<br />
-        Amount held in cash: ${props.potB}<br />
+        Portfolio Balance: ${props.balance.toFixed(2)}<br />
+        Amount invested in equities: ${props.potA.toFixed(2)}<br />
+        Amount held in cash: ${props.potB.toFixed(2)}<br />
+        Rounds Left: {props.rounds}<br />
       </p>
     );
   } else if (props.version === 2) {
     return (
       <p className="info">
         Round: {props.round}<br />
-        Growth Portfolio Balance: {props.potA}<br />
-        Spending Portfolio Balance: {props.potB}<br />
+        Total Wealth: ${props.balance.toFixed(2)}<br />
+        Growth Portfolio Balance: ${props.potA.toFixed(2)}<br />
+        Spending Portfolio Balance: ${props.potB.toFixed(2)}<br />
       </p>
     );
   }
@@ -92,28 +86,27 @@ function MarketInfo(props) {
   let increased = props.change > 0;
   let newPotA = props.potA + props.change;
   if (increased) {
-    result = `Hooray! The markets went up and your equities increased in value from $${props.potA} to $${newPotA}. `
+    result = `Hooray! The markets went up and your equities increased in value from $${props.potA.toFixed(2)} to $${newPotA.toFixed(2)}. `
   } else {
-    result = `Uh oh! The markets went down and your equities decreased in value from $${props.potA} to $${newPotA}. `
+    result = `Uh oh! The markets went down and your equities decreased in value from $${props.potA.toFixed(2)} to $${newPotA.toFixed(2)}. `
   }
 
   let increaseOrDecrease = increased ? 'increase' : 'decrease';
   let info;
   if (props.version === 1) {
-    info = `After the market ${increaseOrDecrease}, your portfolio was rebalance to 50/50 according to Modern Portfolio Theory. Then, $1 was taken from your portfolio to account for living expenses.`
+    info = `After the market ${increaseOrDecrease}, $1 was taken from your portfolio to account for living expenses. Then, your portfolio was rebalanced to a 50/50 allocation according to Modern Portfolio Theory.`
   } else {
-
+    info = `After the market ${increaseOrDecrease}, $1 was taken from your spending portfolio. Your current portfolio balances are shown above.`
   }
-  let end = props.shouldEnd() ? true : false;
 
   let bgImage = increased ? pic1 : pic2;
   return (
     <div>
-    <div className="market-info">
-      <img src={bgImage} alt={`market ${increaseOrDecrease}`}/>
-      <p id="market-info-results">{result}{info}</p>
-    </div>
-      <ContinueBtn onClick={props.continue} end={end} info={props.gameData} />
+      <div className="market-info">
+        <img src={bgImage} alt={`market ${increaseOrDecrease}`} />
+        <p id="market-info-results">{result}{info}</p>
+      </div>
+      <ContinueBtn onClick={props.continue} end={props.shouldEnd} info={props.gameData} />
     </div>
   );
 }
@@ -195,11 +188,10 @@ export default class GameScreen extends React.Component {
   constructor(props) {
     super(props);
 
-    let numRounds = 0;
+    let numRounds = 4;
     for (let i = 0; i < 6; ++i) {
       numRounds += Math.round(Math.random());
     }
-    numRounds += 4;
 
     // Sets states with values for the balance, round, and rounds
     this.state = {
@@ -207,11 +199,13 @@ export default class GameScreen extends React.Component {
       potA: 4.0,
       potB: 4.0,
       round: 1,
-      rounds: numRounds,
+      roundsLeft: numRounds,
       stage: "rules",
-      allocation: 50
+      allocation: 50,
+      gameData: []
     };
 
+    // Bind necessary class methods
     this.spend = this.spend.bind(this);
     this.markets = this.markets.bind(this);
     this.rebalance = this.rebalance.bind(this);
@@ -221,20 +215,47 @@ export default class GameScreen extends React.Component {
     this.handleRebalanceOver = this.handleRebalanceOver.bind(this);
     this.shouldEnd = this.shouldEnd.bind(this);
     this.handleRulesBtn = this.handleRulesBtn.bind(this);
+    this.addRoundData = this.addRoundData.bind(this);
+  }
+
+  // Method for adding the data from a round to the state at the end of the round
+  addRoundData() {
+    this.setState(state => {
+      const gameData = state.gameData.concat({
+        round: state.round,
+        initPotA: state.initPotA,
+        initPotB: state.initPotB,
+        marketResult: state.gainOrLoss > 0 ? "Increase" : "Decrease",
+        marketGainOrLoss: state.gainOrLoss,
+        potAAfterMarket: state.potAAfterMarket,
+        potBAfterSpend: Number.parseFloat(state.potBAfterSpend.toFixed(2)),
+        userDidRebalance: state.userDidRebalance,
+        potAFinal: state.potA,
+        potBFinal: state.potB
+      });
+
+      return {
+        gameData
+      }
+    });
   }
 
   // Spends $1 of balance (has to be done every round)
   spend() {
+    this.setState(state => ({
+      initPotB: state.potB,
+      potBAfterSpend: state.potB - 1
+    }));
     if (this.props.version === 1) {
-      this.setState(state => ({ balance: Math.round((state.balance - 1) * 100) / 100 }));
+      this.setState(state => ({ balance: Number.parseFloat((state.balance - 1).toFixed(2)) }));
       this.setState(state => ({
-        potA: Math.round(state.balance / 2 * 100) / 100,
-        potB: Math.round(state.balance / 2 * 100) / 100
+        potA: Math.ceil(state.balance / 2 * 100) / 100,
+        potB: Math.floor(state.balance / 2 * 100) / 100
       }));
     } else if (this.props.version === 2) {
       this.setState(state => ({
-        balance: Math.round((state.balance - 1) * 100) / 100,
-        potB: Math.round((state.potB - 1) * 100) / 100
+        balance: Number.parseFloat((state.balance - 1).toFixed(2)),
+        potB: Number.parseFloat((state.potB - 1).toFixed(2))
       }));
     }
     this.setState({ stage: "continue" });
@@ -244,43 +265,68 @@ export default class GameScreen extends React.Component {
   markets() {
     let result = Math.round(Math.random());
     if (result === 1) {
-      this.setState(state => ({ gainOrLoss: state.potA * 0.5 - state.potA, initPotA: state.potA }));
-      this.setState(state => ({ potA: state.potA * 0.5 }));
+      this.setState(state => {
+        let initialA = state.potA;
+        let deltaA = Number.parseFloat((state.potA * 0.5 - state.potA).toFixed(2));
+
+        return {
+          gainOrLoss: deltaA,
+          potA: initialA + deltaA,
+          initPotA: initialA,
+          potAAfterMarket: initialA + deltaA
+        }
+      });
       this.setState(state => ({ balance: state.potA + state.potB }));
     } else {
-      this.setState(state => ({ gainOrLoss: state.potA * 2 - state.potA, initPotA: state.potA }));
-      this.setState(state => ({  potA: state.potA * 2 }));
+      this.setState(state => {
+        let initialA = state.potA;
+        let deltaA = Number.parseFloat((state.potA * 2 - state.potA).toFixed(2));
+
+        return {
+          gainOrLoss: deltaA,
+          potA: initialA + deltaA,
+          initPotA: initialA,
+          potAAfterMarket: initialA + deltaA
+        }
+      });
       this.setState(state => ({ balance: state.potA + state.potB }));
     }
     this.spend();
+    // Add round data if the game will end after this market action
+    if (this.shouldEnd()[0]) {
+      this.addRoundData();
+    }
   }
 
-  // Rebalances the pot based on the allocation value (ranges from 0 --> 1)
+  // Rebalances the pot based on the allocation value (ranges from 0.25 --> 0.75)
   rebalance() {
     this.setState(state => ({
-      potA: Math.round(state.balance * (state.allocation) * 100) / 100,
-      potB: Math.round(state.balance * (1 - state.allocation) * 100) / 100
+      potA: Number(state.allocation),
+      potB: Number(state.balance - state.allocation)
     }));
   }
 
   // Continue to next round
-  continue() {
-    this.setState(state => ({
-      round: state.round + 1,
-      rounds: state.rounds - 1,
-      stage: "rebalance"
-    }));
+  continue(shouldEnd) {
+    this.setState({ stage: "rebalance" });
   }
 
   // Checks if should end
   shouldEnd() {
     let end;
-    if (this.state.rounds === 1 || this.state.potA <= 0 || this.state.balance <= 0) {
+    let result = undefined;
+    if (this.state.roundsLeft === 1 || this.state.potA <= 0 || this.state.balance <= 0) {
+      if (this.state.balance >= 0) {
+        result = "success";
+      } else {
+        result = "failed";
+      }
       end = true;
     } else {
       end = false;
     }
-    return end;
+
+    return [end, result];
   }
 
   // Handles the change to the allocation value when the rebalance slider is moved
@@ -292,15 +338,29 @@ export default class GameScreen extends React.Component {
   // Handles the result of the user hitting yes or no to rebalancing
   handleRebalanceChoice(id) {
     if (id === "yes") {
-      this.setState({ rebalance: true })
+      // sets the states needed for user to rebalance
+      this.setState({
+        rebalance: true,
+        userDidRebalance: "yes"
+      });
     } else if (id === "no") {
-      this.setState({ stage: "markets" });
+      this.setState({ userDidRebalance: "no" });
+      // Call function to end rebalancing
+      this.handleRebalanceOver();
     }
   }
 
   // For the button that the user clicks when they are done rebalancing
   handleRebalanceOver() {
-    this.setState({ stage: "markets", rebalance: false });
+    // Adds round data to the array in state after the user clicks done rebalancing
+    this.addRoundData();
+
+    this.setState(state => ({
+      stage: "markets",
+      round: state.round + 1,
+      roundsLeft: state.roundsLeft - 1,
+      rebalance: false
+    }));
   }
 
   // For the I understand button that comes after the game rules
@@ -310,18 +370,21 @@ export default class GameScreen extends React.Component {
 
   render() {
     let option;
-    let info = <GameInfo version={this.props.version} potA={this.state.potA} potB={this.state.potB} balance={this.state.balance} round={this.state.round} />;
+    let info = <GameInfo version={this.props.version} potA={this.state.potA} potB={this.state.potB} balance={this.state.balance} round={this.state.round} rounds={this.state.roundsLeft} />;
 
     if (this.state.stage === "markets") {
       option = <Button variant="danger" onClick={this.markets}>Start Round {this.state.round}</Button>;
     } else if (this.state.stage === "rebalance") {
-      option = <RebalanceOptns version={this.props.version} onClick={this.handleRebalanceChoice} showSlider={this.state.rebalance} onSlide={this.handleSlide} done={this.handleRebalanceOver} />;
+      option = <RebalanceOptns version={this.props.version} onClick={this.handleRebalanceChoice} showSlider={this.state.rebalance} onSlide={this.handleSlide} done={this.handleRebalanceOver} potA={this.state.potA} balance={this.state.balance} />;
     } else if (this.state.stage === "continue") {
-      if (this.shouldEnd()) {
-        let gameData = { ...this.state, fromGame: true }; // info to be passed to end screen
-        option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} shouldEnd={this.shouldEnd} gameData={gameData} continue={this.continue} />;
+      let endData = this.shouldEnd();
+      let end = endData[0];
+      let result = endData[1];
+      if (end) {
+        let gameInfo = { gameData: this.state.gameData, result: result, version: this.props.version }; // info to be passed to end screen
+        option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} shouldEnd={end} gameData={gameInfo} continue={this.continue} addRoundData={this.addRoundData} />;
       } else {
-        option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} shouldEnd={this.shouldEnd} continue={this.continue} />;
+        option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} continue={this.continue} />;
       }
     }
 
