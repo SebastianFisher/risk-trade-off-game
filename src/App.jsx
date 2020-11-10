@@ -21,6 +21,7 @@ export default function App() {
                     <Route path="/" >
                         <HomeScreen />
                     </Route>
+                    <HomeScreen />
                 </Switch>
             </div>
         </Router>
