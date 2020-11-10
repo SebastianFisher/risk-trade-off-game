@@ -25,7 +25,7 @@ export default function App() {
             */}
             <div className="retirement-game">
                 <Switch>
-                    <Route exact path="/">
+                    <Route exact path="./retirement-game">
                         <HomeScreen />
                     </Route>
                     <Route path="/game-1">
