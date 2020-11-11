@@ -91,8 +91,8 @@ export default class EndScreen extends React.Component {
             message = `Congratulations! You successfully completed ${rounds} rounds of the game and finished with a total balance of $${(this.data[rounds - 1].potAFinal + this.data[rounds - 1].potBFinal).toFixed(2)}.` +
                 " Your stats for each round are shown in the table above.";
         } else if (result === "failed") {
-            message = `Unfortunately, you failed to complete the game and ran out of money. You made it through ${rounds - 1} rounds successfully.` +
-                " Your stats for each round are shown in the table above."
+            message = `Unfortunately, you failed to complete the game and ran out of money. You made it through ${rounds - 1} rounds successfully ` +
+                ` before going bankrupt on round ${rounds}. Your stats for each round are shown in the table above.`
         }
 
         // Render the info from the game if the user accessed the link from the game

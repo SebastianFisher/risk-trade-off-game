@@ -66,7 +66,6 @@ function GameInfo(props) {
         Portfolio Balance: ${props.balance.toFixed(2)}<br />
         Amount invested in equities: ${props.potA.toFixed(2)}<br />
         Amount held in cash: ${props.potB.toFixed(2)}<br />
-        Rounds Left: {props.rounds}<br />
       </p>
     );
   } else if (props.version === 2) {
@@ -119,25 +118,30 @@ function GameRules(props) {
         <h4>Rules:</h4>
         <ul className="rules-list">
           <li>
-            At the start of the game you will have a portfolio worth $8. Half of the portfolio will be invested in stocks, and the other half will be in cash.
+            {"At the start of the game you will have a portfolio worth $6. " +
+              "Half of the portfolio will be invested in stocks, and the other half will be in cash."}
           </li>
           <li>
-            The object of the game is to avoid running out of money, and you will get to keep any money remaining in your portfolio at the conclusion of the game.
+            {"The object of the game is to avoid running out of money, and you will get to keep any money " +
+              "remaining in your portfolio at the conclusion of the game."}
           </li>
           <li>
-            The game will continue for a number of rounds (“years”?) between 6 and 12, but you will not know in advance how many rounds there will be.
+            {"The game will continue for a number of \"years\" between 4 and 10, " +
+              "but you will not know in advance how many rounds there will be."}
           </li>
           <li>
             The progression for each round will be as follows:
             <ul>
               <li>
-                The computer will determine what happens in “the markets” by randomly choosing between two outcomes: in the first outcome, the money in your portfolio that is allocated to stocks will double, while in the second outcome the stocks portion of the portfolio will be cut in half
+                {"The computer will determine what happens in “the markets” by randomly choosing between two outcomes: " +
+                  "in the first outcome, the money in your portfolio that is allocated to stocks will double, while in the second outcome the stocks portion of the portfolio will be cut in half"}
               </li>
               <li>
                 Regardless of what happens in the markets, the computer will take $1 from your “paycheck” portfolio to cover your annual spending
               </li>
               <li>
-                The computer will then “rebalance” your portfolio. The initial default for the rebalancing will be to allocate the portfolio equally between  stocks and cash, but in each round you will have the option to adjust the default allocation up to 25% in either direction (i.e. between 25% cash/ 75% stocks and 75% cash /25% equities)
+                {"The computer will then “rebalance” your portfolio. " +
+                  "The initial default for the rebalancing will be to allocate the portfolio equally between stocks and cash, but in each round you will have the option to adjust the default allocation up to 25% in either direction (i.e. between 25% cash/ 75% stocks and 75% cash /25% equities)"}
               </li>
               <li>
                 Once you have decided on any changes to the default asset allocation, the game will proceed to the next round
@@ -154,24 +158,34 @@ function GameRules(props) {
         <h4>Rules:</h4>
         <ul className="rules-list">
           <li>
-            At the start of the game you will have two portfolios, a “paycheck” portfolio with $4 and a “growth” portfolio, also with $4. The purpose of the paycheck portfolio is to finance your “annual” spending of $1, which means that at the outset you will have enough in this portfolio to cover 4 “years” worth of spending
+            {"At the start of the game you will have two portfolios, a “paycheck” portfolio with $3 and a “growth” portfolio, " +
+              "also with $3. The purpose of the paycheck portfolio is to finance your “annual” spending of $1, which means that " +
+              "at the outset you will have enough in this portfolio to cover 3 “years” worth of spending"}
           </li>
           <li>
-            The object of the game is to avoid running out of money, and you will get to keep any money remaining in either portfolio at the conclusion of the game.
+            {"The object of the game is to avoid running out of money, and you will " +
+              "get to keep any money remaining in either portfolio at the conclusion of the game."}
           </li>
           <li>
-            The game will continue for a number of rounds (“years”?) between 6 and 12, but you will not know in advance how many rounds there will be.
+            {"The game will continue for a number of \"years\" between 4 and 10, " +
+              "but you will not know in advance how many rounds there will be."}
           </li>
           <li>
             The progression for each round will be as follows:
             <ul>
               <li>
-                The computer will determine what happens in “the markets” by randomly choosing between two outcomes: in the first outcome, the money in your “growth” portfolio will double, while in the second outcome the “growth” portfolio will be cut in half              </li>
+                {"The computer will determine what happens in “the markets” by randomly choosing between two outcomes: " +
+                  "in the first outcome, the money in your “growth” portfolio will double, while in the second outcome " +
+                  "the \"growth\" portfolio will be cut in half"}
+              </li>
               <li>
                 The computer will take $1 from your “paycheck” portfolio to cover your annual spending.
               </li>
               <li>
-                You will then have the choice to move money between your two portfolios. You can either 1) move money from the growth portfolio to the paycheck portfolio to cover additional years of spending or 2) move money from the paycheck portfolio to the growth portfolio to take more risk.              </li>
+                {"You will then have the choice to move money between your two portfolios. You can either 1) " +
+                  "move money from the growth portfolio to the paycheck portfolio to cover additional years of spending or 2)" +
+                  " move money from the paycheck portfolio to the growth portfolio to take more risk."}
+              </li>
               <li>
                 Once you have decided on any shifts between the two portfolios, the game will proceed to the next round.
               </li>
@@ -188,16 +202,16 @@ export default class GameScreen extends React.Component {
   constructor(props) {
     super(props);
 
-    let numRounds = 4;
+    let numRounds = 6;
     for (let i = 0; i < 6; ++i) {
       numRounds += Math.round(Math.random());
     }
 
     // Sets states with values for the balance, round, and rounds
     this.state = {
-      balance: 8.0,
-      potA: 4.0,
-      potB: 4.0,
+      balance: 6.0,
+      potA: 3.0,
+      potB: 3.0,
       round: 1,
       roundsLeft: numRounds,
       stage: "rules",
@@ -219,7 +233,12 @@ export default class GameScreen extends React.Component {
   }
 
   // Method for adding the data from a round to the state at the end of the round
-  addRoundData() {
+  addRoundData(shouldEnd) {
+    if (shouldEnd) {
+      this.setState({
+        userDidRebalance: "N/A"
+      });
+    }
     this.setState(state => {
       const gameData = state.gameData.concat({
         round: state.round,
@@ -235,12 +254,12 @@ export default class GameScreen extends React.Component {
       });
 
       return {
-        gameData
+        gameData: gameData
       }
     });
   }
 
-  // Spends $1 of balance (has to be done every round)
+  // Spends $1 of balance (done every round)
   spend() {
     this.setState(state => ({
       initPotB: state.potB,
@@ -294,7 +313,7 @@ export default class GameScreen extends React.Component {
     this.spend();
     // Add round data if the game will end after this market action
     if (this.shouldEnd()[0]) {
-      this.addRoundData();
+      this.addRoundData(true);
     }
   }
 
@@ -307,7 +326,7 @@ export default class GameScreen extends React.Component {
   }
 
   // Continue to next round
-  continue(shouldEnd) {
+  continue() {
     this.setState({ stage: "rebalance" });
   }
 
@@ -315,7 +334,7 @@ export default class GameScreen extends React.Component {
   shouldEnd() {
     let end;
     let result = undefined;
-    if (this.state.roundsLeft === 1 || this.state.potA <= 0 || this.state.balance <= 0) {
+    if (this.state.roundsLeft === 1 || this.state.balance <= 0) {
       if (this.state.balance >= 0) {
         result = "success";
       } else {
@@ -341,10 +360,10 @@ export default class GameScreen extends React.Component {
       // sets the states needed for user to rebalance
       this.setState({
         rebalance: true,
-        userDidRebalance: "yes"
+        userDidRebalance: "Yes"
       });
     } else if (id === "no") {
-      this.setState({ userDidRebalance: "no" });
+      this.setState({ userDidRebalance: "No" });
       // Call function to end rebalancing
       this.handleRebalanceOver();
     }
@@ -353,7 +372,7 @@ export default class GameScreen extends React.Component {
   // For the button that the user clicks when they are done rebalancing
   handleRebalanceOver() {
     // Adds round data to the array in state after the user clicks done rebalancing
-    this.addRoundData();
+    this.addRoundData(false);
 
     this.setState(state => ({
       stage: "markets",
@@ -370,7 +389,7 @@ export default class GameScreen extends React.Component {
 
   render() {
     let option;
-    let info = <GameInfo version={this.props.version} potA={this.state.potA} potB={this.state.potB} balance={this.state.balance} round={this.state.round} rounds={this.state.roundsLeft} />;
+    let info = <GameInfo version={this.props.version} potA={this.state.potA} potB={this.state.potB} balance={this.state.balance} round={this.state.round} />;
 
     if (this.state.stage === "markets") {
       option = <Button variant="danger" onClick={this.markets}>Start Round {this.state.round}</Button>;
