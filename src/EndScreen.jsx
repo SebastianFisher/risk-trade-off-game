@@ -1,4 +1,6 @@
 import React from 'react';
+import {Link} from "react-router-dom";
+import {Button} from "react-bootstrap";
 import "./EndScreen.css";
 
 function Row(props) {
@@ -100,8 +102,15 @@ export default class EndScreen extends React.Component {
             return (
                 <div className="end-screen-info">
                     <DataTable data={this.data} version={this.props.location.state.version} /> <br />
-                    {message}
+                    {message} 
+                    <br />
+                    <br />
+                    <br />
+                    <Link to="./" className="home-btn">
+                        <Button variant="danger"><span className="home-btn">Return to Home Page</span></Button>
+                    </Link>
                 </div>
+                
             );
         } else {
             return (
