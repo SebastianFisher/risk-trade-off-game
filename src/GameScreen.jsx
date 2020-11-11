@@ -202,7 +202,7 @@ export default class GameScreen extends React.Component {
   constructor(props) {
     super(props);
 
-    let numRounds = 6;
+    let numRounds = 4;
     for (let i = 0; i < 6; ++i) {
       numRounds += Math.round(Math.random());
     }
