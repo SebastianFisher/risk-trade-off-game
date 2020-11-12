@@ -1,10 +1,11 @@
 import React from 'react';
 import './GameScreen.css';
 import Button from "react-bootstrap/Button";
-import Link from "react-router-dom/Link";
 import RebalanceSlider from "./RebalanceSlider.jsx";
 import pic1 from "./images/market-increase.png";
 import pic2 from "./images/market-decrease.png";
+
+const Link = require("react-router-dom").Link;
 
 function RebalanceOptns(props) {
   let slider;
@@ -20,7 +21,7 @@ function RebalanceOptns(props) {
   } else {
     choices = (
       <div id="choices-container">
-        <label id="rebalance-q" for="choices">{message}</label>
+        <label id="rebalance-q" htmlFor="choices">{message}</label>
         <div id="choices">
           <Button id="yes-rebalance" variant="danger" onClick={(e) => props.onClick("yes", e)}>Yes</Button>
           <Button id="no-rebalance" variant="danger" onClick={(e) => props.onClick("no", e)}>No</Button>
@@ -199,7 +200,7 @@ function GameRules(props) {
 }
 
 // Container component for the info so I can include a loading animatino (not sure if there's another way to do this)
-class GameOptions extends React.Component{
+class GameOptions extends React.Component {
   constructor(props) {
     super(props)
 
@@ -210,19 +211,19 @@ class GameOptions extends React.Component{
     this.setState({ loading: false });
   }
 
-  demoAsyncCall(){
+  demoAsyncCall() {
     return new Promise((resolve) => setTimeout(() => resolve(), 2500));
   }
 
   render() {
-    const {loading} = this.state;
+    const { loading } = this.state;
     if (loading) {
       return null;
     }
     return (
       this.props.option
     )
-    
+
   }
 }
 
@@ -258,15 +259,22 @@ export default class GameScreen extends React.Component {
     this.shouldEnd = this.shouldEnd.bind(this);
     this.handleRulesBtn = this.handleRulesBtn.bind(this);
     this.addRoundData = this.addRoundData.bind(this);
+    this.addRoundDataCheckEnd = this.addRoundDataCheckEnd.bind(this);
   }
 
-  // Method for adding the data from a round to the state at the end of the round
-  addRoundData(shouldEnd) {
-    if (shouldEnd) {
+  // Method for adding the data from a round to the state at the end of the round, 
+  // but checks if the game should end and does necessary updates if so
+  addRoundDataCheckEnd() {
+    if (this.shouldEnd()[0]) {
       this.setState({
         userDidRebalance: "N/A"
       });
+      this.addRoundData();
     }
+  }
+
+  // Function for adding the round data (doesn't including checking if the game should end)
+  addRoundData() {
     this.setState(state => {
       const gameData = state.gameData.concat({
         round: state.round,
@@ -294,55 +302,55 @@ export default class GameScreen extends React.Component {
       potBAfterSpend: state.potB - 1
     }));
     if (this.props.version === 1) {
-      this.setState(state => ({ balance: Number.parseFloat((state.balance - 1).toFixed(2)) }));
-      this.setState(state => ({
-        potA: Math.ceil(state.balance / 2 * 100) / 100,
-        potB: Math.floor(state.balance / 2 * 100) / 100
-      }));
+      this.setState(state => {
+        return { balance: Number.parseFloat((state.balance - 1).toFixed(2)) }
+      });
+      this.setState(
+        state => ({
+          potA: Math.ceil(state.balance / 2 * 100) / 100,
+          potB: Math.floor(state.balance / 2 * 100) / 100
+        }),
+        // Saves the round data to state, but will only happen if the game should end after
+        // this market/spending cycle
+        this.addRoundDataCheckEnd
+      );
     } else if (this.props.version === 2) {
-      this.setState(state => ({
-        balance: Number.parseFloat((state.balance - 1).toFixed(2)),
-        potB: Number.parseFloat((state.potB - 1).toFixed(2))
-      }));
+      this.setState(
+        state => ({
+          balance: Number.parseFloat((state.balance - 1).toFixed(2)),
+          potB: Number.parseFloat((state.potB - 1).toFixed(2))
+        }),
+        // Saves the round data to state, but will only happen if the game should end after
+        // this market/spending cycle
+        this.addRoundDataCheckEnd
+      );
     }
-    this.setState({ stage: "continue" });
   }
 
   // Simulates action of the markets on your balance
   markets() {
+
+    // Simulate action of the market
     let result = Math.round(Math.random());
+    let change;
     if (result === 1) {
-      this.setState(state => {
-        let initialA = state.potA;
-        let deltaA = Number.parseFloat((state.potA * 0.5 - state.potA).toFixed(2));
-
-        return {
-          gainOrLoss: deltaA,
-          potA: initialA + deltaA,
-          initPotA: initialA,
-          potAAfterMarket: initialA + deltaA
-        }
-      });
-      this.setState(state => ({ balance: state.potA + state.potB }));
+      change = 0.5;
     } else {
-      this.setState(state => {
-        let initialA = state.potA;
-        let deltaA = Number.parseFloat((state.potA * 2 - state.potA).toFixed(2));
+      change = 2;
+    }
 
-        return {
-          gainOrLoss: deltaA,
-          potA: initialA + deltaA,
-          initPotA: initialA,
-          potAAfterMarket: initialA + deltaA
-        }
-      });
-      this.setState(state => ({ balance: state.potA + state.potB }));
-    }
+    // update appropriate values in state for the market result
+    this.setState(state => ({
+      gainOrLoss: Number.parseFloat((state.potA * change - state.potA).toFixed(2)),
+      potA: Number.parseFloat((state.potA * change).toFixed(2)),
+      initPotA: state.potA,
+      potAAfterMarket: state.potA + Number.parseFloat((state.potA * change - state.potA).toFixed(2))
+    }));
+    this.setState(state => ({ balance: state.potA + state.potB }));
+
+    // Set the state to continue and call the spend method 
     this.spend();
-    // Add round data if the game will end after this market action
-    if (this.shouldEnd()[0]) {
-      this.addRoundData(true);
-    }
+    this.setState({ stage: "continue" });
   }
 
   // Rebalances the pot based on the allocation value (ranges from 0.25 --> 0.75)
@@ -362,7 +370,7 @@ export default class GameScreen extends React.Component {
   shouldEnd() {
     let end;
     let result = undefined;
-    if (this.state.roundsLeft === 1 || this.state.balance <= 0) {
+    if (this.state.roundsLeft <= 1 || this.state.balance <= 0) {
       if (this.state.balance >= 0) {
         result = "success";
       } else {
@@ -371,6 +379,7 @@ export default class GameScreen extends React.Component {
       end = true;
     } else {
       end = false;
+      result = undefined;
     }
 
     return [end, result];
@@ -400,7 +409,7 @@ export default class GameScreen extends React.Component {
   // For the button that the user clicks when they are done rebalancing
   handleRebalanceOver() {
     // Adds round data to the array in state after the user clicks done rebalancing
-    this.addRoundData(false);
+    this.addRoundData();
 
     this.setState(state => ({
       stage: "markets",
@@ -429,7 +438,7 @@ export default class GameScreen extends React.Component {
       let result = endData[1];
       if (end) {
         let gameInfo = { gameData: this.state.gameData, result: result, version: this.props.version }; // info to be passed to end screen
-        option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} shouldEnd={end} gameData={gameInfo} continue={this.continue} addRoundData={this.addRoundData} />;
+        option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} shouldEnd={end} gameData={gameInfo} continue={this.continue} />;
       } else {
         option = <MarketInfo change={this.state.gainOrLoss} version={this.props.version} potA={this.state.initPotA} continue={this.continue} />;
       }

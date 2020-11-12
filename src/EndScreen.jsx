@@ -28,7 +28,6 @@ function Row(props) {
 function DataTable(props) {
     // Take in data from props
     let data = props.data;
-    console.log(data)
     // Separate data into a two dimensional array containing arrays of round data
     let tableData = [];
     for (let i = 0; i < data.length; i++) {
