@@ -25,6 +25,11 @@ div {
   font-family: Arial;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .loader:empty {
   position: relative;
   left: calc(50% - 1.5em);

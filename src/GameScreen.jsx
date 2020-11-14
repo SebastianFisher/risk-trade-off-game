@@ -118,7 +118,7 @@ function MarketInfo(props) {
     <div>
       <div className="market-info">
         <img src={bgImage} alt={`market ${increaseOrDecrease}`} />
-        <p id="market-info-results">{result}{info}</p>
+        <div className="results-container"><p className="results">{result}{info}</p></div>
       </div>
       <ContinueBtn onClick={props.continue} end={props.shouldEnd} info={props.gameData} />
     </div>
