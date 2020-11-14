@@ -4,8 +4,20 @@ import Button from "react-bootstrap/Button";
 import RebalanceSlider from "./RebalanceSlider.jsx";
 import pic1 from "./images/market-increase.png";
 import pic2 from "./images/market-decrease.png";
+import Portfolio from "./Portfolio.jsx";
 
 const Link = require("react-router-dom").Link;
+
+// Possibly change model of returns, maybe have a list of years of 
+// returns that can be chosen from at random
+// Practice round with more commentary?
+// Need more explanation? It's hard to weigh the probabilities
+// Change wording of rules (mention probability?)
+// Should have more framing (i.e. advice after the market action occurs)
+// Also maybe change the game screen so that one has a singular portfolio and the other has two
+// Figure out how we can "game" the system and give people a random but chosen scenario for the markets
+
+
 
 function RebalanceOptns(props) {
   let slider;
@@ -62,21 +74,23 @@ function ContinueBtn(props) {
 function GameInfo(props) {
   if (props.version === 1) {
     return (
-      <p className="info">
-        Round: {props.round}<br />
-        Portfolio Balance: ${props.balance.toFixed(2)}<br />
-        Amount invested in equities: ${props.potA.toFixed(2)}<br />
-        Amount held in cash: ${props.potB.toFixed(2)}<br />
-      </p>
+      <div className="info">
+        <Portfolio balance={props.balance} result={props.marketResult} title={"Investment Portfolio"} equities={props.potA} cash={props.potB} />
+        <p style={{ fontSize: 22 }}>
+          Round: {props.round}<br />
+        </p>
+      </div>
     );
   } else if (props.version === 2) {
     return (
-      <p className="info">
-        Round: {props.round}<br />
-        Total Wealth: ${props.balance.toFixed(2)}<br />
-        Growth Portfolio Balance: ${props.potA.toFixed(2)}<br />
-        Spending Portfolio Balance: ${props.potB.toFixed(2)}<br />
-      </p>
+      <div clasName="info">
+        <Portfolio balance={props.potA} result={props.marketResult} title={"Growth Portfolio"} />
+        <Portfolio balance={props.potB} title={"Spending Portfolio"} result={props.spendResult} />
+        <p style={{ fontSize: 22 }}>
+          Round: {props.round}<br />
+          Total Wealth: ${props.balance.toFixed(2)}<br />
+        </p>
+      </div>
     );
   }
 }
@@ -138,7 +152,7 @@ function GameRules(props) {
                   "in the first outcome, the money in your portfolio that is allocated to stocks will double, while in the second outcome the stocks portion of the portfolio will be cut in half"}
               </li>
               <li>
-                Regardless of what happens in the markets, the computer will take $1 from your “paycheck” portfolio to cover your annual spending
+                Regardless of what happens in the markets, the computer will take $1 from your portfolio to cover your annual spending
               </li>
               <li>
                 {"The computer will then “rebalance” your portfolio. " +
@@ -180,7 +194,7 @@ function GameRules(props) {
                   "the \"growth\" portfolio will be cut in half"}
               </li>
               <li>
-                The computer will take $1 from your “paycheck” portfolio to cover your annual spending.
+                The computer will take $1 from your spending portfolio to cover your annual spending.
               </li>
               <li>
                 {"You will then have the choice to move money between your two portfolios. You can either 1) " +
@@ -199,7 +213,7 @@ function GameRules(props) {
   }
 }
 
-// Container component for the info so I can include a loading animatino (not sure if there's another way to do this)
+// Container component for the info so I can include a loading animation (not sure if there's another way to do this)
 class GameOptions extends React.Component {
   constructor(props) {
     super(props)
@@ -208,11 +222,11 @@ class GameOptions extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({ loading: false });
+    this.demoAsyncCall().then(this.setState({ loading: false }));
   }
 
   demoAsyncCall() {
-    return new Promise((resolve) => setTimeout(() => resolve(), 2500));
+    return new Promise((resolve) => setTimeout(() => resolve(), 1000));
   }
 
   render() {
@@ -299,7 +313,8 @@ export default class GameScreen extends React.Component {
   spend() {
     this.setState(state => ({
       initPotB: state.potB,
-      potBAfterSpend: state.potB - 1
+      potBAfterSpend: state.potB - 1,
+      spendResult: "decrease"
     }));
     if (this.props.version === 1) {
       this.setState(state => {
@@ -330,8 +345,10 @@ export default class GameScreen extends React.Component {
   // Simulates action of the markets on your balance
   markets() {
 
-    // Simulate action of the market
+    // Simulate action of the market and create a state property for the result
     let result = Math.round(Math.random());
+    this.setState({ marketResult: result === 0 ? "increase" : "decrease" });
+
     let change;
     if (result === 1) {
       change = 0.5;
@@ -361,8 +378,11 @@ export default class GameScreen extends React.Component {
     }));
   }
 
-  // Continue to next round
+  // Continue to the rebalance phase
   continue() {
+    // Change marketResult so that no arrow is displayed in the portfolio
+    this.setState({ marketResult: "n/a", spendResult: "n/a" });
+
     this.setState({ stage: "rebalance" });
   }
 
@@ -426,7 +446,7 @@ export default class GameScreen extends React.Component {
 
   render() {
     let option;
-    let info = <GameInfo version={this.props.version} potA={this.state.potA} potB={this.state.potB} balance={this.state.balance} round={this.state.round} />;
+    let info = <GameInfo version={this.props.version} potA={this.state.potA} potB={this.state.potB} balance={this.state.balance} round={this.state.round} marketResult={this.state.marketResult} spendResult={this.state.spendResult} />;
 
     if (this.state.stage === "markets") {
       option = <Button variant="danger" onClick={this.markets}>Start Round {this.state.round}</Button>;

@@ -1,5 +1,6 @@
 Button {
     margin: 0px 20px;
+    display: inline-block;
 }
 span.btn {
     font-size: 25px;
