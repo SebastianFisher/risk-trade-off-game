@@ -1,5 +1,4 @@
 Button {
-    margin: 0px 20px;
     display: inline-block;
 }
 span.btn {
@@ -10,19 +9,18 @@ span.btn {
 .home-screen {
     height: 100%;
     width: 100%;
-    position: relative;
 }
 
 .ver-1-btn {
     position: relative;
-    top: 550px;
-    right: 50px;
+    top: 375px;
+    margin: 5px 10px;
 }
 
 .ver-2-btn {
     position: relative;
-    top: 550px;
-    left: 50px;
+    top: 375px;
+    margin: 5px 10px;
 }
 
 
