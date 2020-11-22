@@ -1,0 +1,9 @@
+Things to get done: 
+Visual:
+    - I2O: spending portfolio on the left, growth on the right 
+    - In the middle, have a circle showing breakdown??
+
+Key format:
+    - Survey page with demographic information?
+    - Maybe discrete set of outcomes? [-20, -10, 10, 20]
+    

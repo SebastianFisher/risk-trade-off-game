@@ -1,0 +1,23 @@
+.survey {
+    text-align: left;
+    width: 98%;
+    max-width: 500px;
+    margin: 0 auto;
+    overflow: auto;
+}
+
+.title {
+    padding: 0;
+    margin: 0 auto;
+    text-align: center;
+}
+
+small {
+    text-align: center;
+    display: block;
+    margin: 0 auto;
+}
+
+br {
+    line-height: 5px;
+}
