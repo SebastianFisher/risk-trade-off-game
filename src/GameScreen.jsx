@@ -2,7 +2,7 @@ import React from 'react';
 import './GameScreen.css';
 import Button from "react-bootstrap/Button";
 import RebalanceSlider from "./RebalanceSlider.jsx";
-import pic1 from "./images/GroverRunning.jpeg";
+import pic1 from "./images/market-increase.jpeg";
 import pic2 from "./images/market-decrease.png";
 import Portfolio from "./Portfolio.jsx";
 
