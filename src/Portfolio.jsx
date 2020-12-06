@@ -6,12 +6,13 @@ import down from "./images/down-arrow.png";
 export default function Portfolio(props) {
     // Initialize an arrow to nothing currently (in the case that no increase has been made)
     let arrow = null;
+    let animation = "arrowIn 0.5s ease-in forwards";
     // Create var for the arrow depending on market result prop
     const result = props.result;
     if (result === "increase") {
-        arrow = <img src={up} alt="result arrow" />;
+        arrow = <img src={up} alt="result arrow" style={{ animation }} />;
     } else if (result === "decrease") {
-        arrow = <img src={down} alt="result arrow" />;
+        arrow = <img src={down} alt="result arrow" style={{ animation }} />;
     } else {
         arrow = null;
     }

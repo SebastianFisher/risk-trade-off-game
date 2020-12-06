@@ -213,34 +213,6 @@ function GameRules(props) {
   }
 }
 
-// Container component for the info so I can include a loading animation (not sure if there's another way to do this)
-class GameOptions extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = { loading: true };
-  }
-
-  componentDidMount() {
-    this.demoAsyncCall().then(this.setState({ loading: false }));
-  }
-
-  demoAsyncCall() {
-    return new Promise((resolve) => setTimeout(() => resolve(), 1000));
-  }
-
-  render() {
-    const { loading } = this.state;
-    if (loading) {
-      return null;
-    }
-    return (
-      this.props.option
-    )
-
-  }
-}
-
 export default class GameScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -469,9 +441,7 @@ export default class GameScreen extends React.Component {
       main = (
         <main>
           {info}
-          <div className="loader option-buttons">
-            <GameOptions option={option} />
-          </div>
+          {option}
         </main>
       );
     } else {

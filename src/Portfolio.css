@@ -63,3 +63,12 @@
     height: 50%;
     padding-top: calc(50% - 1em);
 }
+
+@keyframes arrowIn {
+    from {
+        transform: scale(0.75);
+    }
+    to {
+        transform: scale(1);
+    }
+}

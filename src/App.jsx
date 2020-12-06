@@ -9,22 +9,22 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function App() {
     return (
-        // <Router>
-        //     <div className="retirement-game">
-        //         <Switch>
-        //             <Route path="/end" component={EndScreen}/>
-        //             <Route path="/game-1" >
-        //                 <GameScreen version={1} />
-        //             </Route>
-        //             <Route path="/game-2">
-        //                 <GameScreen version={2} />
-        //             </Route>
-        //             <Route path="/" >
-        //                 <HomeScreen />
-        //             </Route>
-        //         </Switch>
-        //     </div>
-        // </Router>
-        <Survey />
+        <Router>
+            <div className="retirement-game">
+                <Switch>
+                    <Route path="/end" component={EndScreen}/>
+                    <Route path="/game-1" >
+                        <GameScreen version={1} />
+                    </Route>
+                    <Route path="/game-2">
+                        <GameScreen version={2} />
+                    </Route>
+                    <Route path="/" >
+                        <HomeScreen />
+                    </Route>
+                </Switch>
+            </div>
+        </Router>
+        // <Survey /> 
     );
 }
