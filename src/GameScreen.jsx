@@ -108,9 +108,9 @@ function MarketInfo(props) {
   let increaseOrDecrease = increased ? 'increase' : 'decrease';
   let info;
   if (props.version === 1) {
-    info = `After the market ${increaseOrDecrease}, $1 was taken from your portfolio to account for living expenses. Then, your portfolio was rebalanced to a 50/50 allocation according to Modern Portfolio Theory.`
+    info = `After the market ${increaseOrDecrease}, $20 were taken from your portfolio to account for living expenses. Then, your portfolio was rebalanced to a 50/50 allocation according to Modern Portfolio Theory.`
   } else {
-    info = `After the market ${increaseOrDecrease}, $1 was taken from your spending portfolio. Your current portfolio balances are shown above.`
+    info = `After the market ${increaseOrDecrease}, $20 were taken from your spending portfolio. Your current portfolio balances are shown above.`
   }
 
   let bgImage = increased ? pic1 : pic2;
@@ -217,17 +217,18 @@ export default class GameScreen extends React.Component {
   constructor(props) {
     super(props);
 
-    let numRounds = 4;
-    for (let i = 0; i < 6; ++i) {
-      numRounds += Math.round(Math.random());
-    }
-
+    let numRounds = 6;
+    // for (let i = 0; i < 6; ++i) {
+    //   numRounds += Math.round(Math.random());
+    // }
+    const paths = [[-0.2, 0.2, -0.2, 0.3, 0.1, -0.2], [-0.3, 0.2, 0, 0.4, .1, 0.3], [0.1, 0.1, 0, 0.2, 0, 0.1], [0.1, 0.1, 0, 0.2, 0.2], [0.1, 0.2, 0.1, 0, -0.1, 0], [-0.1, -.4, -.2, 0.4, 0.4, 0.2], [0.2, -.2, .3, .3, .2, .1], [-.2, .3, .3, 0, .2, 0], [0.3, 0.1, 0.2, 0.3, 0.1, 0.2], [0.1, 0.1, 0.1, 0.1, -0.1, 0.2]];
     // Sets states with values for the balance, round, and rounds
     this.state = {
-      balance: 6.0,
-      potA: 3.0,
-      potB: 3.0,
+      balance: 100.0,
+      potA: 50.0,
+      potB: 50.0,
       round: 1,
+      path: paths[Math.floor(Math.random()*10)],
       roundsLeft: numRounds,
       stage: "rules",
       allocation: 50,
@@ -285,12 +286,12 @@ export default class GameScreen extends React.Component {
   spend() {
     this.setState(state => ({
       initPotB: state.potB,
-      potBAfterSpend: state.potB - 1,
+      potBAfterSpend: state.potB - 20,
       spendResult: "decrease"
     }));
     if (this.props.version === 1) {
       this.setState(state => {
-        return { balance: Number.parseFloat((state.balance - 1).toFixed(2)) }
+        return { balance: Number.parseFloat((state.balance - 20).toFixed(2)) }
       });
       this.setState(
         state => ({
@@ -304,8 +305,8 @@ export default class GameScreen extends React.Component {
     } else if (this.props.version === 2) {
       this.setState(
         state => ({
-          balance: Number.parseFloat((state.balance - 1).toFixed(2)),
-          potB: Number.parseFloat((state.potB - 1).toFixed(2))
+          balance: Number.parseFloat((state.balance - 20).toFixed(2)),
+          potB: Number.parseFloat((state.potB - 20).toFixed(2))
         }),
         // Saves the round data to state, but will only happen if the game should end after
         // this market/spending cycle
@@ -318,15 +319,8 @@ export default class GameScreen extends React.Component {
   markets() {
 
     // Simulate action of the market and create a state property for the result
-    let result = Math.round(Math.random());
-    this.setState({ marketResult: result === 0 ? "increase" : "decrease" });
-
-    let change;
-    if (result === 1) {
-      change = 0.5;
-    } else {
-      change = 2;
-    }
+    let change = this.state.path[this.state.round-1] + 1;
+    this.setState({ marketResult: change > 0 ? "increase" : "decrease" });
 
     // update appropriate values in state for the market result
     this.setState(state => ({
